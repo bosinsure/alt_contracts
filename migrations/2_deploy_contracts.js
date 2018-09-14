@@ -4,12 +4,18 @@ const BosiCrowdsale = artifacts.require('BosiCrowdsale');
 const gasPrice = 10000000000; //  Setting default gas price at 10 gwei
 
 module.exports = function(deployer, network, accounts) {
-  // const openingTime = web3.eth.getBlock('latest').timestamp + 2; // two secs in the future
-  // const closingTime = openingTime + 86400 * 20; // 20 days
-  // const rate = new web3.BigNumber(3000);
-  // const wallet = "0x4f713d697c053278b0f9aa272061dbf17ba0ee3cdda18e687755a7bf00dfd5b7";
-  // const goal = 1000 * (10 ** 18);
-  // const cap = 9000 * (10 ** 18);
+  
+  // This script deploys the Token and Crowdsale contracts to the specified network.
+  // The general steps of deployment are:
+  // 1 - deploy Token using account[0]
+  // 2 - get Token_Address
+  // 3 - deploy Crowdsale with Token_Address as parameter using account[0]
+  // 4 - transfer ownership of Token from account[0] to Crowdsale -- Manual
+  // 5 - transfer ownership of Crowdsale from account[0] to Owner -- Manual
+
+  //TODO use start and end time in config file in production
+  const openingTime = web3.eth.getBlock('latest').timestamp + 2; // two secs in the future
+  const closingTime = openingTime + 86400 * 7; // 20 days
 
   deployer.deploy(
     BosiToken, {gas: 3900000, gasPrice: gasPrice}
@@ -20,8 +26,8 @@ module.exports = function(deployer, network, accounts) {
   .then(() => {
     return deployer.deploy(
       BosiCrowdsale,
-      // openingTime,
-      // closingTime,
+      openingTime,
+      closingTime,
       // rate,
       // wallet,
       BosiToken.address

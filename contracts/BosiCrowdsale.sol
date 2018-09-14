@@ -14,32 +14,28 @@ contract BosiCrowdsale is RefundableCrowdsale, CappedCrowdsale, BosiCrowdsaleCon
     uint256 public hardcap = CONFIG_HARDCAP;
     uint256 public softcap = CONFIG_SOFTCAP;
 
-    constructor (BosiToken _token)
-        public
+    uint256 public weiRaisedFromOthers;
+
+
+    // TODO for deployment of actual contract, use start and end time off config file
+    constructor (uint256 _start_time, uint256 _end_time, BosiToken _token) public
         Crowdsale(tokens_per_ether, multisig_wallet, _token)
         RefundableCrowdsale(softcap)
-        TimedCrowdsale(start_time, end_time) 
+        TimedCrowdsale(_start_time, _end_time) 
         CappedCrowdsale(hardcap)
-        {
-        }
+    {
+        start_time = _start_time;
+        end_time = _end_time;
+    }
 
+    // sets wei amount raised from others (Fiat and alt coins)
+    function setWeiRaisedFromOthers(uint256 _weiRaisedFromOthers) public onlyOwner {
+        weiRaisedFromOthers = _weiRaisedFromOthers;
+    }
 
-    // constructor
-    //     (
-    //         uint256 _openingTime,
-    //         uint256 _closingTime,
-    //         uint256 _rate,
-    //         address _wallet,
-    //         BosiToken _token,
-    //         uint256 _goal,
-    //         uint256 _cap
-    //     )
-    //     public
-    //     Crowdsale(_rate, _wallet, _token)
-    //     RefundableCrowdsale(_goal)
-    //     TimedCrowdsale(_openingTime, _closingTime) 
-    //     CappedCrowdsale(_cap)
-    //     {
-
-    //     }
+    // @return true if crowdsale event has ended either due to time or hardcap
+    function hasSaleEnded() public view returns (bool) {
+        bool capReached = weiRaised.add(weiRaisedFromOthers) >= hardcap;
+        return capReached || now > end_time;
+    }
 }
